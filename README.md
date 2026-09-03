@@ -1,29 +1,45 @@
 # RabbitMQConsumer
 
-.NET Console Application using RabbitMQ for receiving messages from a queue.
+## 1. Overview
 
-## Overview
+RabbitMQConsumer is a simple .NET console application that connects to a RabbitMQ broker and consumes messages from a configured queue. It is intended as a minimal, adaptable example for learning or integrating a message consumer into background services.
 
-This is a small .NET console app that connects to a RabbitMQ broker and consumes messages from a configured queue. It is intended as a simple consumer example you can adapt for background services or integrations.
+## 2. Description
 
-## Prerequisites
+The application establishes a connection to RabbitMQ using host, port, and credentials provided via environment variables (or application configuration). It declares/ensures the target queue exists and registers a consumer callback to receive and process messages. Message processing logic is implemented in Program.cs and can be adapted to your needs (logging, forwarding, persisting, etc.).
 
-- .NET SDK 6.0 or later (https://dotnet.microsoft.com)
+## 3. Pre-requisites
+
+- .NET 10 SDK (https://dotnet.microsoft.com)
 - A running RabbitMQ server (local or remote)
+- Recommended: Git for cloning the repository
 
-## Configuration
+Running RabbitMQ in WSL (Windows)
 
-The application reads RabbitMQ connection values from environment variables. If your project uses a different configuration approach, update the code or provide an `appsettings.json` accordingly.
+If you run RabbitMQ inside WSL (for example Ubuntu), ensure WSL networking is configured so Windows tools can access the broker. Add a file named `.wslconfig` in your Windows user profile (C:\Users\<YourUser>\.wslconfig) with the following contents to enable mirrored networking:
 
-Environment variable examples:
+```
+[wsl2]
+networkingMode=mirrored
+```
 
-- RABBITMQ_HOST (default: `localhost`)
-- RABBITMQ_PORT (default: `5672`)
-- RABBITMQ_USERNAME (default: `guest`)
-- RABBITMQ_PASSWORD (default: `guest`)
+After editing `.wslconfig`, restart WSL with:
+
+```powershell
+wsl --shutdown
+```
+
+Then start your WSL distribution and ensure RabbitMQ is running inside it (for example: `sudo service rabbitmq-server start`). When using mirrored networking you can typically use `localhost` from Windows; otherwise use the WSL instance IP address.
+
+Required environment variables (defaults noted where applicable):
+
+- RABBITMQ_HOST (default: localhost)
+- RABBITMQ_PORT (default: 5672)
+- RABBITMQ_USERNAME (default: guest)
+- RABBITMQ_PASSWORD (default: guest)
 - QUEUE_NAME (name of the queue to consume)
 
-Example (Linux / macOS):
+Example (Linux / macOS / WSL shell):
 
 ```bash
 export RABBITMQ_HOST=localhost
@@ -43,31 +59,35 @@ $env:RABBITMQ_PASSWORD = "guest"
 $env:QUEUE_NAME = "task_queue"
 ```
 
-## Build and run
+## 4. Build and Run
 
-1. Clone the repository and change into the project directory:
+1. Clone the repository and open the project folder:
 
 ```bash
 git clone https://github.com/atishagarwaal/RabbitMQConsumer.git
 cd RabbitMQConsumer
 ```
 
-2. Build the project:
+2. Restore and build the project:
 
 ```bash
-dotnet build
+dotnet restore
+dotnet build --configuration Release
 ```
 
-3. Run the consumer:
+3. Set the required environment variables (see examples above).
+
+4. Run the consumer:
 
 ```bash
-dotnet run --project ./
+dotnet run --project .
 ```
 
-The consumer will connect to the configured RabbitMQ instance and start printing/processing incoming messages from the configured queue.
+Or run the published binary:
 
-## How it works
+```bash
+dotnet publish -c Release -o ./publish
+./publish/RabbitMQConsumer
+```
 
-- The app creates a connection to RabbitMQ using the supplied host, port, and credentials.
-- It declares/ensures the queue exists and sets up a consumer callback.
-- When messages arrive they are processed by the consumer logic (see Program.cs).
+The application will connect to the configured RabbitMQ instance and begin consuming messages from the specified queue. Check Program.cs for the message handling implementation and adjust as needed.

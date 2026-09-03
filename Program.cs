@@ -23,7 +23,7 @@ class Program
         {
             // Declare the queue (ensure it exists)
             channel.QueueDeclare(queue: "demo_queue",
-                                 durable: false,
+                                 durable: true,
                                  exclusive: false,
                                  autoDelete: false,
                                  arguments: null);
